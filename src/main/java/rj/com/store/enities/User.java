@@ -1,5 +1,5 @@
 package rj.com.store.enities;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

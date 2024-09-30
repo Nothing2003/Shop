@@ -1,9 +1,9 @@
 package rj.com.store.datatransferobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
