@@ -19,7 +19,7 @@ public class OrderController {
     public OrderController(OrderService orderService){
         this.orderService=orderService;
     }
-    @PreAuthorize("hasAnyRole('NORMAL','ADMIN')")
+    @PreAuthorize("hasAnyRole('"+AppCon.ROLE_ADMIN+"','"+AppCon.ROLE_NORMAL+"')")
     @PostMapping("/create/user/{userId}/cart/{cartId}")
     public ResponseEntity<OrderDTO> createOrder(
             @RequestBody OrderDTO orderDTO,
@@ -27,7 +27,7 @@ public class OrderController {
             @PathVariable("cartId") String cartId){
         return new ResponseEntity<>(orderService.createOrder(orderDTO,userId,cartId), HttpStatus.CREATED);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('"+AppCon.ROLE_ADMIN+"')")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<ApiResponseMessage> deleteOrder(@PathVariable("orderId") String orderId){
         orderService.removeOrder(orderId);
@@ -37,12 +37,12 @@ public class OrderController {
                 .massage("Order is successfully removed !!")
                 .build(),HttpStatus.OK);
     }
-    @PreAuthorize("hasAnyRole('NORMAL','ADMIN')")
+    @PreAuthorize("hasAnyRole('"+AppCon.ROLE_NORMAL+"','"+AppCon.ROLE_ADMIN+"')")
     @GetMapping("{userId}")
     public ResponseEntity<List<OrderDTO>> getAllOrderByUserId(@PathVariable("userId") String userId ){
         return new ResponseEntity<>(orderService.getAllOrderOfUser(userId),HttpStatus.OK);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('"+AppCon.ROLE_ADMIN+"')")
     @GetMapping
     public ResponseEntity<PageableResponse<OrderDTO>> getAllOrder(
             @RequestParam(value = "pageNumber", defaultValue = AppCon.Page_Number, required = false) int pageNumber,
@@ -53,7 +53,7 @@ public class OrderController {
     {
         return new ResponseEntity<>(orderService.getAllOrder(pageNumber,pageSize,sortBy,sortDir),HttpStatus.OK);
     }
-    @PreAuthorize("hasAnyRole('NORMAL','ADMIN')")
+    @PreAuthorize("hasAnyRole('"+AppCon.ROLE_NORMAL+"','"+AppCon.ROLE_ADMIN+"')")
     @PostMapping("/update/{orderId}")
     public ResponseEntity<OrderDTO> updateOrder(
             @RequestBody OrderDTO orderDTO,

@@ -14,6 +14,7 @@ import rj.com.store.datatransferobjects.UserDTO;
 import rj.com.store.enities.Role;
 import rj.com.store.enities.User;
 import rj.com.store.exceptions.ResourceNotFoundException;
+import rj.com.store.helper.AppCon;
 import rj.com.store.helper.Helper;
 import rj.com.store.repositories.RoleRepository;
 import rj.com.store.repositories.UserRepositories;
@@ -50,11 +51,11 @@ public class UserServiceImp implements UserService {
         //that method convert dto -> entity
         User user = userdtoToEntity(userDTO);
         //By default, all user are NORMAL
-        Role role1 =roleRepository.findByRoleName("ROLE_NORMAL").orElse(null);
+        Role role1 =roleRepository.findByRoleName("ROLE_"+ AppCon.ROLE_NORMAL).orElse(null);
         if (role1 == null) {
             role1 = new Role();
             role1.setRoleId(UUID.randomUUID().toString());
-            role1.setRoleName("ROLE_NORMAL");
+            role1.setRoleName("ROLE_"+AppCon.ROLE_NORMAL);
             roleRepository.save(role1);
         }
         user.setRoles(List.of(role1));
