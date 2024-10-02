@@ -1,5 +1,10 @@
 package rj.com.store.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -28,6 +33,8 @@ import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/users")
+@SecurityRequirement(name = "scheme")
+@Tag(name = "Users Controller ",description = "This is user Api for users operation")
 public class UserController {
     private Logger logger= LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
@@ -38,9 +45,15 @@ public class UserController {
         this.userService = userService;
         this.fileService=fileService;
     }
-
     //create
     @PostMapping
+    @Operation(summary = "create new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Success | OK "),
+            @ApiResponse(responseCode = "401",description = "not authorized !! "),
+            @ApiResponse(responseCode = "201",description = "new User created !! ")
+    }
+    )
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
         userDTO.setProvider(Providers.SELF);
         if (userDTO.getImageName().isEmpty()) {
@@ -51,14 +64,15 @@ public class UserController {
     }
     //update
     @PutMapping("/{userId}")
+    @Operation(summary = "update user")
     public ResponseEntity<UserDTO> updateUser(
             @Valid @RequestBody UserDTO userDTO,
             @PathVariable("userId") String userId) {
         return new ResponseEntity<>(userService.UpdateUser(userDTO, userId), HttpStatus.OK);
     }
-
     //delete
     @DeleteMapping("/{userId}")
+    @Operation(summary = "delete user")
     public ResponseEntity<ApiResponseMessage> deleteUser(
             @PathVariable("userId") String userId) throws IOException {
 
@@ -71,9 +85,9 @@ public class UserController {
                 .build(), HttpStatus.OK);
 
     }
-
     //get All
     @GetMapping
+    @Operation(summary = "get all users")
     public ResponseEntity<PageableResponse<UserDTO>> getAllUsers(
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
             @RequestParam(value = "pageSize",defaultValue = AppCon.Page_Size,required = false) int pageSize,
@@ -84,27 +98,27 @@ public class UserController {
                 .getAllUser(pageNumber,pageSize,sortBy,sortDir),
                 HttpStatus.OK);
     }
-
     //get By id
     @GetMapping("/{userId}")
+    @Operation(summary = "get single user")
     public ResponseEntity<UserDTO> getUserById(
             @PathVariable("userId") String userId) {
         return new ResponseEntity<>(userService
                 .getUserById(userId),
                 HttpStatus.OK);
     }
-
     //get By Email
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserDTO> getUserByemail(
+    @Operation(summary = "get user by emailId")
+    public ResponseEntity<UserDTO> getUserByEmail(
             @PathVariable("email") String email) {
         return new ResponseEntity<>(userService
                 .getUserByEmail(email),
                 HttpStatus.OK);
     }
-
     //search user
     @GetMapping("/search/{keyword}")
+    @Operation(summary = "search user by key word")
     public ResponseEntity<PageableResponse<UserDTO>> searchUser(
             @PathVariable("keyword") String keyword,
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
@@ -116,7 +130,7 @@ public class UserController {
                         .searchUser(keyword, pageNumber, pageSize, sortBy, sortDir),
                 HttpStatus.OK);
     }
-//upload image
+    //upload image
     @PostMapping("/image/{userId}")
     public ResponseEntity<ImageResponse> uploadUserImage(@PathVariable("userId") String userId,
             @RequestParam("userImage")MultipartFile image) throws IOException{

@@ -4,6 +4,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.TableGenerator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +26,14 @@ import rj.com.store.exceptions.ResourceNotFoundException;
 import rj.com.store.security.JwtHelper;
 import rj.com.store.services.RefreshTokenService;
 import rj.com.store.services.UserService;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(originPatterns = "*")
+@SecurityRequirement(name = "scheme")
+@Tag(name = "Authentication" ,description = "APIs for authentication ")
 public class AuthenticationController {
     @Value("${app.google.client_id}")
     private String googleClientId;
@@ -54,6 +58,7 @@ public class AuthenticationController {
         this.refreshTokenService=refreshTokenService;
     }
     @PostMapping("/generate-token")
+    @Operation(summary = "Generate Token by JWTRequest")
     public ResponseEntity<JWTResponse> login(@RequestBody JWTRequest jwtRequest) {
 
         logger.info("Username {}, Password {}", jwtRequest.getEmail(), jwtRequest.getPassword());
@@ -70,6 +75,7 @@ public class AuthenticationController {
                         .build());
     }
     @PostMapping("/regenerate-token")
+    @Operation(summary = "Generate Token by Refresh Token Request")
     public ResponseEntity<JWTResponse>regenerateToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         RefreshTokenDTO refreshTokenDTO=refreshTokenService.findByToken(refreshTokenRequest.getRefreshToken());
         RefreshTokenDTO refreshTokenDTO1=refreshTokenService.verifyRefreshToken(refreshTokenDTO);
@@ -83,6 +89,7 @@ public class AuthenticationController {
 
     //handle login with Google
     @PostMapping("/login-with-google")
+    @Operation(summary = "Generate Token by Google Login Request")
     public ResponseEntity<JWTResponse> handleGoogleLogin(@RequestBody GoogleLoginRequest googleLoginRequest) throws GeneralSecurityException, IOException {
         logger.info("Google login request {}", googleLoginRequest.getIdToken());
         GoogleIdTokenVerifier token= new GoogleIdTokenVerifier.Builder(new ApacheHttpTransport(),new GsonFactory()).setAudience(List.of(googleClientId)).build();

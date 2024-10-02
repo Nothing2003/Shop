@@ -1,5 +1,8 @@
 package rj.com.store.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -15,12 +18,12 @@ import rj.com.store.datatransferobjects.*;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.CategoryService;
 import rj.com.store.services.FileService;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 @RestController
 @RequestMapping("/categories")
+@SecurityRequirement(name = "scheme")
+@Tag(name = "Category Controller ",description = "This is cart Api for category operation")
 public class CategoryController {
     private final Logger logger=LoggerFactory.getLogger(CategoryController.class);
     private final CategoryService categoryService;
@@ -31,15 +34,16 @@ public class CategoryController {
         this.categoryService = categoryService;
         this.fileService=fileService;
     }
-
     //create
     @PostMapping
+    @Operation(summary = "Create a category")
     public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
         return new ResponseEntity<>(categoryService.createCategory(categoryDTO), HttpStatus.CREATED);
     }
 
     //update
     @PutMapping("/{categoryId}")
+    @Operation(summary = "Update category by category Id")
     public ResponseEntity<CategoryDTO> updateCategory(@Valid
             @RequestBody CategoryDTO categoryDTO,
             @PathVariable("categoryId") String categoryId
@@ -49,6 +53,7 @@ public class CategoryController {
 
     //delete
     @DeleteMapping("/{categoryId}")
+    @Operation(summary = "Delete category by category Id")
     public ResponseEntity<ApiResponseMessage> deleteCategory(@PathVariable("categoryId") String categoryId) {
         categoryService.deleteCategory(categoryId);
         return new ResponseEntity<>(
@@ -63,6 +68,7 @@ public class CategoryController {
 
     //get all
     @GetMapping
+    @Operation(summary = "Get all category")
     public ResponseEntity<PageableResponse<CategoryDTO>> getAllCategory(
             @RequestParam(value = "pageNumber", defaultValue = AppCon.Page_Number, required = false) int pageNumber,
             @RequestParam(value = "pageSize", defaultValue = AppCon.Page_Size, required = false) int pageSize,
@@ -78,11 +84,13 @@ public class CategoryController {
 
     //get single
     @GetMapping("/{categoryId}")
+    @Operation(summary = "Get category by category")
     public ResponseEntity<CategoryDTO> getSingleCategoryById(@PathVariable("categoryId") String categoryId) {
         return new ResponseEntity<>(categoryService.getCategoryById(categoryId), HttpStatus.OK);
     }
 
     @GetMapping("/search/{keyword}")
+    @Operation(summary ="Search category by keyword")
     public ResponseEntity<PageableResponse<CategoryDTO>> searchUser(
             @PathVariable("keyword") String keyword,
             @RequestParam(value = "pageNumber", defaultValue = AppCon.Page_Number, required = false) int pageNumber,
@@ -96,6 +104,7 @@ public class CategoryController {
 
     //upload image
     @PostMapping("/image/{categoryId}")
+
     public ResponseEntity<ImageResponse> uploadUserImage(@PathVariable("categoryId") String categoryId,
                                                          @RequestParam("categoryCoverImage") MultipartFile image) throws IOException {
         String imageName = fileService.uploadImage(image, imageUploadPath);

@@ -1,4 +1,7 @@
 package rj.com.store.controller;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +14,8 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/products")
+@SecurityRequirement(name = "scheme")
+@Tag(name = "Products Controller ",description = "This is product Api for products operation")
 public class ProductController {
     ProductService productService;
     public  ProductController(ProductService productService){
@@ -18,12 +23,14 @@ public class ProductController {
     }
     //    create
     @PostMapping
+    @Operation(summary = " Create a product")
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO)
     {
         return new ResponseEntity<>(productService.createProduct(productDTO), HttpStatus.CREATED);
     }
     //    delete
     @DeleteMapping("/{productId}")
+    @Operation(summary = "Delete a product")
     public ResponseEntity<ApiResponseMessage> deleteProduct(@PathVariable("productId") String productId)
     {
         productService.DeleteProduct(productId);
@@ -36,12 +43,14 @@ public class ProductController {
     }
     //    update
     @PutMapping("/{productId}")
+    @Operation(summary = "Update a product")
     public   ResponseEntity<ProductDTO> updateProduct(@PathVariable("productId") String productId ,@RequestBody ProductDTO productDTO)
     {
         return new ResponseEntity<>(productService.updateProduct(productDTO,productId), HttpStatus.ACCEPTED);
     }
     //    get Single Product
     @GetMapping("/{productId}")
+    @Operation(summary = " Get single product by product Id")
     public ResponseEntity<ProductDTO> getSingleProduct(@PathVariable("productId") String productId)
     {
         productService.getSingleProduct(productId);
@@ -49,6 +58,7 @@ public class ProductController {
     }
     //    get All Product
     @GetMapping
+    @Operation(summary = "Get all products")
     public   ResponseEntity<PageableResponse<ProductDTO>> getAllProduct(
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
             @RequestParam(value = "pageSize",defaultValue = AppCon.Page_Size,required = false) int pageSize,
@@ -60,6 +70,7 @@ public class ProductController {
     }
     //    search
     @GetMapping("/search/{keyword}")
+    @Operation(summary = "Search product by keyword")
     public ResponseEntity<PageableResponse<ProductDTO>> searchProduct(
             @PathVariable("keyword") String keyword,
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
@@ -72,6 +83,7 @@ public class ProductController {
     }
     //    get All Product Live
     @GetMapping("/available")
+    @Operation(summary = "Get all available products ")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductIsLive(
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
             @RequestParam(value = "pageSize",defaultValue = AppCon.Page_Size,required = false) int pageSize,
@@ -83,6 +95,7 @@ public class ProductController {
     }
     //    get All Product Not Live
     @GetMapping("/not/available")
+    @Operation(summary = "Get all unavailable products ")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductIsNotLive(
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
             @RequestParam(value = "pageSize",defaultValue = AppCon.Page_Size,required = false) int pageSize,
@@ -94,6 +107,7 @@ public class ProductController {
     }
     //    get All Product by date
     @GetMapping("/date")
+    @Operation(summary = "Get products by date")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductByDate(
             @RequestBody Date date,
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
@@ -106,6 +120,7 @@ public class ProductController {
     }
     //    get all product by price
     @GetMapping("/price")
+    @Operation(summary = "Get all products by price ")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductByPrice(
             @RequestParam("price") double price,
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
@@ -119,6 +134,7 @@ public class ProductController {
 
     //    get all product between price
     @GetMapping("/price/limit")
+    @Operation(summary = "Get all product between minimum and maximum price ")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductBetweenPrice(
             @RequestParam("min-price") double minPrice,
             @RequestParam("max-price") double maxPrice,
@@ -132,11 +148,13 @@ public class ProductController {
     }
     //product with category
     @PostMapping("/with-category/{categoryId}")
+    @Operation(summary = "User to create product with category ")
     public ResponseEntity<ProductDTO> createProductWithCategory(@PathVariable("categoryId") String categoryId,@RequestBody ProductDTO productDTO){
         return new ResponseEntity<>(productService.createWithCategory(productDTO,categoryId),HttpStatus.CREATED);
     }
     //get all product by category
     @GetMapping("/category-by-product/{categoryId}")
+    @Operation(summary = "User to get all products by category Id ")
     public ResponseEntity<PageableResponse<ProductDTO>> getProductByCategory(
             @PathVariable("categoryId") String categoryId,
             @RequestParam(value = "pageNumber",defaultValue = AppCon.Page_Number,required = false) int pageNumber,
@@ -151,6 +169,7 @@ public class ProductController {
     }
     //update product by category
     @PutMapping("/update-category/product/{productId}/category/{categoryId}")
+    @Operation(summary = "Products by category Id ")
     public ResponseEntity<ProductDTO> updateProductCategory(
             @PathVariable("categoryId") String categoryId,
             @PathVariable("productId") String productId

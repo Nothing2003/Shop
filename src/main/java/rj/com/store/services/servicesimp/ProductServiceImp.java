@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import rj.com.store.datatransferobjects.CategoryDTO;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.ProductDTO;
 import rj.com.store.enities.Category;
@@ -17,7 +16,6 @@ import rj.com.store.exceptions.ResourceNotFoundException;
 import rj.com.store.helper.Helper;
 import rj.com.store.repositories.CategoryRepository;
 import rj.com.store.repositories.ProductRepository;
-import rj.com.store.services.CategoryService;
 import rj.com.store.services.ImageServiceInCloud;
 import rj.com.store.services.ProductService;
 
@@ -31,7 +29,7 @@ public class ProductServiceImp implements ProductService {
     @Autowired
     private ModelMapper mapper;
     @Autowired
-    private ImageServiceInCloud imageServiceInCloud;
+    private  ImageServiceInCloud imageServiceInCloud;
     @Autowired
     private CategoryRepository categoryRepository;
     private final Logger logger= LoggerFactory.getLogger(ProductServiceImp.class);

@@ -1,6 +1,7 @@
 package rj.com.store.datatransferobjects;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
@@ -28,6 +29,7 @@ public class UserDTO {
     private String userId;
     @NotBlank(message = "Name is required")
     @Size(min = 3, message = "Minimum 3 character required")
+    @Schema(name = "username",accessMode = Schema.AccessMode.READ_ONLY,description = "user name for Database")
     private String name;
 
     @Email(message = "Invalid Email")
