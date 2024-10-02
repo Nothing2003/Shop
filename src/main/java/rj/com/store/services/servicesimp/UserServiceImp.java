@@ -1,7 +1,7 @@
 package rj.com.store.services.servicesimp;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.UserDTO;
+import rj.com.store.enities.Providers;
 import rj.com.store.enities.Role;
 import rj.com.store.enities.User;
 import rj.com.store.exceptions.ResourceNotFoundException;
@@ -21,10 +22,6 @@ import rj.com.store.repositories.UserRepositories;
 import rj.com.store.services.ImageServiceInCloud;
 import rj.com.store.services.UserService;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,15 +38,24 @@ public class UserServiceImp implements UserService {
     PasswordEncoder passwordEncoder;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    private ModelMapper modelMapper;
     @Override
     public UserDTO createUser(UserDTO userDTO) {
         //Generate ID
         String id=UUID.randomUUID().toString();
         userDTO.setUserId(id);
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-
         //that method convert dto -> entity
-        User user = userdtoToEntity(userDTO);
+        User user = modelMapper.map(userDTO, User.class);
+       if (userDTO.getProvider().equals(Providers.SELF)){
+            user.setProviders(Providers.SELF);
+       }
+       if (userDTO.getProvider().equals(Providers.GOOGLE)){
+           user.setProviders(Providers.GOOGLE);
+       }
+
+
         //By default, all user are NORMAL
         Role role1 =roleRepository.findByRoleName("ROLE_"+ AppCon.ROLE_NORMAL).orElse(null);
         if (role1 == null) {
@@ -61,7 +67,7 @@ public class UserServiceImp implements UserService {
         user.setRoles(List.of(role1));
         User saveUser = userRepositories.save(user);
         //that method convert  entity ->  dto
-        return entityToUserDTO(saveUser);
+        return modelMapper.map(saveUser, UserDTO.class);
     }
 
     @Override
@@ -89,7 +95,7 @@ public class UserServiceImp implements UserService {
       }
 
       User updatedUser= userRepositories.save(user);
-      return entityToUserDTO(updatedUser);
+      return modelMapper.map(updatedUser, UserDTO.class);
     }
 
     @Override
@@ -97,14 +103,16 @@ public class UserServiceImp implements UserService {
         User user=userRepositories
                 .findById(userId)
                 .orElseThrow(()->new ResourceNotFoundException("User not found exception"));
-            String fullPath=imagePath+user.getImageName();
+//            String fullPath=imagePath+user.getImageName();
 //        try {
 //            Files.delete(Paths.get(fullPath));
 //        } catch (IOException e){
 //            logger.info("Exception is {}",e.getMessage());
 //
 //        }
-        imageServiceInCloud.deleteImage(user.getImageName());
+        if (!user.getImageName().equalsIgnoreCase("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed")){
+            imageServiceInCloud.deleteImage(user.getImageName());
+        }
         userRepositories.delete(user);
     }
 
@@ -140,7 +148,7 @@ public class UserServiceImp implements UserService {
       User user= userRepositories
               .findById(userId)
               .orElseThrow(()->new ResourceNotFoundException("User Not found with given User Id"));
-      return entityToUserDTO(user);
+      return modelMapper.map(user, UserDTO.class);
     }
 
     @Override
@@ -148,7 +156,7 @@ public class UserServiceImp implements UserService {
        User user= userRepositories
                .findByEmail(userEmail)
                .orElseThrow(()->new ResourceNotFoundException("User not found with given user email"));
-        return  entityToUserDTO(user);
+        return  modelMapper.map(user,UserDTO.class);
     }
 
     @Override
@@ -177,16 +185,5 @@ public class UserServiceImp implements UserService {
 
        return Helper.getPageableResponse(page,UserDTO.class);
     }
-    //That method convert  entity ->dto
-    private UserDTO entityToUserDTO(User saveUser) {
-        UserDTO userDTO=new UserDTO();
-        BeanUtils.copyProperties(saveUser,userDTO);
-        return userDTO;
-    }
-    //That method convert dto -> entity
-    private User userdtoToEntity(UserDTO userDTO) {
-        User user =new User();
-        BeanUtils.copyProperties(userDTO,user);
-        return user;
-    }
+
 }

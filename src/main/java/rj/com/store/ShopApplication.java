@@ -5,6 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rj.com.store.enities.Providers;
 import rj.com.store.enities.Role;
 import rj.com.store.enities.User;
 import rj.com.store.helper.AppCon;
@@ -42,16 +43,17 @@ public class ShopApplication  implements CommandLineRunner {
 			role2.setRoleName("ROLE_"+AppCon.ROLE_NORMAL);
 			roleRepository.save(role2);
 		}
-		User user=userRepositories.findByEmail("soumojitmakar@gmail.com").orElse(null);
+		User user=userRepositories.findByEmail("soumojitmakar1234@gmail.com").orElse(null);
 		if (user == null) {
 			user = new User();
 			user.setName("Soumojit Makar");
-			user.setEmail("soumojitmakar@gmail.com");
+			user.setEmail("soumojitmakar1234@gmail.com");
 			user.setPassword(passwordEncoder.encode("soumojitmakar"));
 			user.setRoles(List.of(role1,role2));
 			user.setGender("Male");
 			user.setImageName("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed");
 			user.setAbout("I am Admin");
+			user.setProviders(Providers.SELF);
 			user.setUserId(UUID.randomUUID().toString());
 			userRepositories.save(user);
 		}
@@ -65,6 +67,7 @@ public class ShopApplication  implements CommandLineRunner {
 			user2.setGender("Male");
 			user2.setImageName("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed");
 			user2.setAbout("I am Normal User");
+			user2.setProviders(Providers.SELF);
 			user2.setUserId(UUID.randomUUID().toString());
 			userRepositories.save(user2);
 		}

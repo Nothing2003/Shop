@@ -41,6 +41,8 @@ public class User implements UserDetails {
     private List<Order> orders =new ArrayList<>();
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private  List<Role> roles=new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private Providers providers=Providers.SELF;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

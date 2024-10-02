@@ -15,6 +15,7 @@ import rj.com.store.datatransferobjects.ApiResponseMessage;
 import rj.com.store.datatransferobjects.ImageResponse;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.UserDTO;
+import rj.com.store.enities.Providers;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.FileService;
 import rj.com.store.services.UserService;
@@ -41,10 +42,13 @@ public class UserController {
     //create
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        userDTO.setProvider(Providers.SELF);
+        if (userDTO.getImageName().isEmpty()) {
+            userDTO.setImageName("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed");
+        }
         UserDTO user = userService.createUser(userDTO);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
-
     //update
     @PutMapping("/{userId}")
     public ResponseEntity<UserDTO> updateUser(

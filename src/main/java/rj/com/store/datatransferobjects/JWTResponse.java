@@ -10,6 +10,6 @@ import lombok.*;
 public class JWTResponse
 {
     private String token;
-    UserDTO user;
-    private String refreshToken;
+    private UserDTO user;
+    private RefreshTokenDTO refreshToken;
 }

@@ -1,6 +1,8 @@
 package rj.com.store.datatransferobjects;
 
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,10 +11,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rj.com.store.enities.Providers;
 import rj.com.store.validate.ImageNameValid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,5 +42,7 @@ public class UserDTO {
 //    @ImageNameValid
     private String imageName;
     private List<RoleDTO> roles=new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private Providers provider=Providers.SELF;
 
 }

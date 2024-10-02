@@ -1,10 +1,11 @@
 package rj.com.store.config;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,22 +15,28 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import rj.com.store.helper.AppCon;
 import rj.com.store.security.JWTAuthenticationFilter;
 import rj.com.store.security.JwtAuthenticationEntryPoint;
 
+import java.util.List;
+
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
-public class SecurityConfig {
-    private JWTAuthenticationFilter authenticationFilter;
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+public class SecurityConfig  {
+    private final JWTAuthenticationFilter authenticationFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     public SecurityConfig(JWTAuthenticationFilter authenticationFilter, JwtAuthenticationEntryPoint authenticationEntryPoint) {
         this.authenticationFilter = authenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(AbstractHttpConfigurer::disable);
+
         http.csrf(AbstractHttpConfigurer::disable);
         //Configuration
         http.authorizeHttpRequests(
@@ -47,8 +54,7 @@ public class SecurityConfig {
                     requests.requestMatchers(HttpMethod.GET,"/categories/**").permitAll()
                             .requestMatchers("/categories/**").hasRole(AppCon.ROLE_ADMIN);
                     //Authentication URL Configuration
-                    requests.requestMatchers(HttpMethod.POST,"/auth/generate-token").permitAll()
-                            .anyRequest().authenticated();
+                    requests.requestMatchers("/auth/**").permitAll();
                 }
         );
         //Type of Security used
@@ -71,4 +77,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
         return builder.getAuthenticationManager();
     }
+
+
 }
