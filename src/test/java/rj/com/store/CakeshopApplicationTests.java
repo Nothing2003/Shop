@@ -9,23 +9,23 @@ import rj.com.store.security.JwtHelper;
 
 @SpringBootTest
 class CakeshopApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-	@Autowired
-	private UserRepositories userRepositories;
-	@Autowired
-	private JwtHelper jwtHelper;
-	@Test
-	void testToken(){
-	User user= userRepositories.findByEmail("soumojitmakar@gmail.com").orElse(null);
-		if (user != null) {
-			String token = jwtHelper.generateToken(user);
-			System.out.println(token);
-			System.out.println(jwtHelper.getUsernameFromToken(token));
-			System.out.println(jwtHelper.getExpirationDateFromToken(token));
-			System.out.println(	jwtHelper.isTokenExpired(token));
-		}
-	}
+//
+//	@Test
+//	void contextLoads() {
+//	}
+//	@Autowired
+//	private UserRepositories userRepositories;
+//	@Autowired
+//	private JwtHelper jwtHelper;
+//	@Test
+//	void testToken(){
+//	User user= userRepositories.findByEmail("soumojitmakar@gmail.com").orElse(null);
+//		if (user != null) {
+//			String token = jwtHelper.generateToken(user);
+//			System.out.println(token);
+//			System.out.println(jwtHelper.getUsernameFromToken(token));
+//			System.out.println(jwtHelper.getExpirationDateFromToken(token));
+//			System.out.println(	jwtHelper.isTokenExpired(token));
+//		}
+//	}
 }

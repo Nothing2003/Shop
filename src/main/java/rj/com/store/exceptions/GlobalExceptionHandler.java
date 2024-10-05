@@ -1,5 +1,7 @@
 package rj.com.store.exceptions;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,12 @@ import java.util.Map;
 
 
 @RestControllerAdvice
+@Tag(name = "Global Exception handler ",description = "It return all type of errors in Api")
 public class GlobalExceptionHandler {
    private final Logger logger= LoggerFactory.getLogger(GlobalExceptionHandler.class);
    //Handel Resource Not Found Exception
     @ExceptionHandler(ResourceNotFoundException.class)
+    @Operation(summary = "It any resource are not found it execute")
     public ResponseEntity<ApiResponseMessage> resourceNotFoundExceptionHandler(ResourceNotFoundException exception){
         logger.info("Execution Handler invoked !! Exception is {}",exception.getMessage());
         return new ResponseEntity<>(
@@ -35,6 +39,7 @@ public class GlobalExceptionHandler {
     }
     //Handel Method Argument Not ValidException
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @Operation(summary = "If any bad as a argument request invoked it is execute")
     public ResponseEntity<Map<String , Object>>  handlerMethodArgumentNotValidException(MethodArgumentNotValidException exception){
         List<ObjectError> errors= exception.getBindingResult().getAllErrors();
         Map<String,Object> response=new HashMap<>();
@@ -49,6 +54,7 @@ public class GlobalExceptionHandler {
 
     //Handel Bad Api Request Exception
     @ExceptionHandler(BadApiRequest.class)
+    @Operation(summary = "If any bad request invoked it is execute")
     public ResponseEntity<ApiResponseMessage> badApiRequestExceptionHandler(BadApiRequest exception){
         logger.info("Execution Handler invoked !! Exception is {}",exception.getMessage());
         return new ResponseEntity<>(
@@ -60,6 +66,7 @@ public class GlobalExceptionHandler {
                 ,HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(BadCredentialsException.class)
+    @Operation(summary = "If user are not authentic then it will be execute")
     public ResponseEntity<ApiResponseMessage> badCredentialsExceptionHandler(BadCredentialsException exception){
         logger.info("Execution Handler invoked !! Exception is {}",exception.getMessage());
         return new ResponseEntity<>(
