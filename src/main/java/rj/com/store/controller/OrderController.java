@@ -16,7 +16,7 @@ import rj.com.store.services.OrderService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/orders//v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Order Controller ",description = "This is order Api for order operation")
 public class OrderController {

@@ -13,11 +13,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import rj.com.store.enities.Providers;
-import rj.com.store.validate.ImageNameValid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,7 +39,6 @@ public class UserDTO {
     private String gender;
     @NotBlank(message = "Write someting  about yourself")
     private String about;
-//    @ImageNameValid
     private String imageName;
     private List<RoleDTO> roles=new ArrayList<>();
     @Enumerated(EnumType.STRING)

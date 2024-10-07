@@ -13,7 +13,7 @@ import rj.com.store.services.ProductService;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/products/v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Products Controller ",description = "This is product Api for products operation")
 public class ProductController {

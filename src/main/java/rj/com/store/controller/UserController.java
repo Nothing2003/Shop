@@ -1,10 +1,6 @@
 package rj.com.store.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,19 +21,15 @@ import rj.com.store.datatransferobjects.ImageResponse;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.UserDTO;
 import rj.com.store.enities.Providers;
-import rj.com.store.exceptions.ResourceNotFoundException;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.FileService;
 import rj.com.store.services.UserService;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users/v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Users Controller ",description = "This is user Api for users operation")
 public class UserController {

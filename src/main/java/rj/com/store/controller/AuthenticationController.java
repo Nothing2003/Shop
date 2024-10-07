@@ -31,7 +31,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Authentication" ,description = "APIs for authentication ")
 public class AuthenticationController {

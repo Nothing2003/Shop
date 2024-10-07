@@ -1,7 +1,5 @@
 package rj.com.store.services.servicesimp;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -27,7 +25,6 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImp implements UserService {
-    private final Logger logger= LoggerFactory.getLogger(UserService.class);
     @Value("${user.profile.image.path}")
     private String imagePath;
     @Autowired
@@ -78,7 +75,7 @@ public class UserServiceImp implements UserService {
       user.setName(userDTO.getName());
       user.setAbout(userDTO.getAbout());
 
-      if (user.getImageName().equalsIgnoreCase(userDTO.getImageName())){
+      if (user.getImageName().equalsIgnoreCase(userDTO.getImageName())||userDTO.getImageName()==null){
           user.setImageName(userDTO.getImageName());
       }
       else {
@@ -87,17 +84,15 @@ public class UserServiceImp implements UserService {
       }
 
       user.setGender(userDTO.getGender());
-      if (userDTO.getPassword().equals(user.getPassword())){
+      if (userDTO.getPassword().equals(user.getPassword()) || userDTO.getPassword()==null){
           user.setPassword(userDTO.getPassword());
       }
       else{
           user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
       }
-
       User updatedUser= userRepositories.save(user);
       return modelMapper.map(updatedUser, UserDTO.class);
     }
-
     @Override
     public void deleteUser(String userId){
         User user=userRepositories
@@ -110,8 +105,10 @@ public class UserServiceImp implements UserService {
 //            logger.info("Exception is {}",e.getMessage());
 //
 //        }
-        if (!user.getImageName().equalsIgnoreCase("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed")){
-            imageServiceInCloud.deleteImage(user.getImageName());
+        if (user.getImageName()!=null){
+            if (!user.getImageName().equalsIgnoreCase("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed")) {
+                imageServiceInCloud.deleteImage(user.getImageName());
+            }
         }
         userRepositories.delete(user);
     }

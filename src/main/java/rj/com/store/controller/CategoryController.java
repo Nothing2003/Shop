@@ -21,7 +21,7 @@ import rj.com.store.services.FileService;
 import java.io.IOException;
 import java.io.InputStream;
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/categories/v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Category Controller ",description = "This is cart Api for category operation")
 public class CategoryController {

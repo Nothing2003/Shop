@@ -14,7 +14,7 @@ import rj.com.store.datatransferobjects.CartItemDTO;
 import rj.com.store.services.CartService;
 
 @RestController
-@RequestMapping("/carts")
+@RequestMapping("/carts/v1")
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Cart Controller ",description = "This is cart Api for cart operation")
 public class CartController {

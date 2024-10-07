@@ -17,7 +17,6 @@ public class CategoryDTO {
     @NotBlank(message = "title required")
     @Size(min = 3,message = "Minimum 3 charter required")
     private String title;
-//    @ImageNameValid(message = "Image Required")
     private String coverImage;
     @NotBlank(message = "description is required")
     private String description;
