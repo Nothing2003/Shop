@@ -15,53 +15,105 @@ import rj.com.store.services.RefreshTokenService;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Implementation of the RefreshTokenService interface.
+ * Provides methods for creating, verifying, and managing refresh tokens for user authentication.
+ */
 @Service
 public class RefreshTokenServiceImp implements RefreshTokenService {
-    @Autowired
-    RefreshTokenRepository refreshTokenRepository;
-    @Autowired
-    UserRepositories userRepositories;
-    @Autowired
-    ModelMapper modelMapper;
-    @Override
-    public RefreshTokenDTO createRefreshToken(String userName) {
-       User user= userRepositories.findByEmail(userName).orElseThrow(()->new ResourceNotFoundException("User not found"));
-        RefreshToken refreshToken=  refreshTokenRepository.findByUser(user).orElse(null);
-       if(refreshToken==null) {
-           refreshToken = RefreshToken.builder()
-                   .user(user)
-                   .token(UUID.randomUUID().toString())
-                   .expiresDate(Instant.now().plusSeconds(30 * 24 * 60 * 60))
-                   .build();
-       }else {
-           refreshToken.setToken(UUID.randomUUID().toString());
-           refreshToken.setExpiresDate(Instant.now().plusSeconds(30 * 24 * 60 * 60));
-       }
-           RefreshToken saveRefresh = refreshTokenRepository.save(refreshToken);
 
-       return  modelMapper.map(saveRefresh, RefreshTokenDTO.class);
+    RefreshTokenRepository refreshTokenRepository;
+    UserRepositories userRepositories;
+    ModelMapper modelMapper;
+    /**
+     * Constructor for the RefreshTokenServiceImp class.
+     *
+     * @param refreshTokenRepository the repository for managing refresh tokens
+     * @param userRepositories the repository for accessing user data
+     * @param modelMapper the ModelMapper instance for converting between entity and DTO
+     */
+    public RefreshTokenServiceImp(RefreshTokenRepository refreshTokenRepository,
+                                  UserRepositories userRepositories,
+                                  ModelMapper modelMapper) {
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.userRepositories = userRepositories;
+
     }
 
+    /**
+     * Creates a new refresh token for the given username.
+     * If the user already has a refresh token, update the existing token with a new one.
+     *
+     * @param userName The username for which to create a refresh token.
+     * @return A DTO object containing the newly created or updated refresh token.
+     */
+    @Override
+    public RefreshTokenDTO createRefreshToken(String userName) {
+        User user = userRepositories.findByEmail(userName)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user).orElse(null);
+
+        if (refreshToken == null) {
+            refreshToken = RefreshToken.builder()
+                    .user(user)
+                    .token(UUID.randomUUID().toString())
+                    .expiresDate(Instant.now().plusSeconds(30 * 24 * 60 * 60)) // Token valid for 30 days
+                    .build();
+        } else {
+            refreshToken.setToken(UUID.randomUUID().toString());
+            refreshToken.setExpiresDate(Instant.now().plusSeconds(30 * 24 * 60 * 60)); // Reset expiration
+        }
+
+        RefreshToken savedRefreshToken = refreshTokenRepository.save(refreshToken);
+        return modelMapper.map(savedRefreshToken, RefreshTokenDTO.class);
+    }
+
+    /**
+     * Retrieves a refresh token by its token string.
+     *
+     * @param token The token string to search for.
+     * @return A DTO object representing the refresh token.
+     */
     @Override
     public RefreshTokenDTO findByToken(String token) {
-        RefreshToken refreshToken= refreshTokenRepository.findByToken(token).orElseThrow(()->new ResourceNotFoundException("Refresh Token not found"));
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh Token not found"));
         return modelMapper.map(refreshToken, RefreshTokenDTO.class);
     }
 
+    /**
+     * Verifies if a refresh token is valid and not expired.
+     * Deletes the token if it has expired.
+     *
+     * @param token The refresh token to verify.
+     * @return A DTO object representing the verified refresh token.
+     */
     @Override
     public RefreshTokenDTO verifyRefreshToken(RefreshTokenDTO token) {
-        var refreshToken=modelMapper.map(token, RefreshToken.class);
-        if (token.getExpiresDate().compareTo(Instant.now())<0) {
+        var refreshToken = modelMapper.map(token, RefreshToken.class);
+
+        // Check if the token has expired
+        if (token.getExpiresDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);
-            throw  new ResourceNotFoundException("Refresh Token  Expired");
+            throw new ResourceNotFoundException("Refresh Token Expired");
         }
+
         return token;
     }
 
+    /**
+     * Retrieves the user associated with a given refresh token.
+     *
+     * @param token The refresh token to use for retrieving the user.
+     * @return A DTO object representing the user.
+     */
     @Override
     public UserDTO getUserByToken(RefreshTokenDTO token) {
-        RefreshToken refreshToken= refreshTokenRepository.findByToken(token.getToken()).orElseThrow(()->new ResourceNotFoundException("Refresh Token not found"));
-        User user=refreshToken.getUser();
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token.getToken())
+                .orElseThrow(() -> new ResourceNotFoundException("Refresh Token not found"));
+
+        User user = refreshToken.getUser();
         return modelMapper.map(user, UserDTO.class);
     }
 }

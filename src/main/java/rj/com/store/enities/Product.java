@@ -7,6 +7,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 @Setter
@@ -35,7 +36,9 @@ public class Product {
     @Column(name = "product_stock")
     private boolean stock;
     private String productImageName;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category")
-    private Category category;
+    // Many-to-Many relationship with join table
+    @ManyToMany( mappedBy = "products",fetch = FetchType.EAGER)
+    private List<Category> categories = new ArrayList<>();
+
+
 }

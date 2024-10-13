@@ -24,6 +24,9 @@ public class Category {
     private String coverImage;
     @Column(name = "category_description",length =1000)
     private String description;
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "category")
-    private List<Product> products=new ArrayList<>();
+    // Bidirectional many-to-many relationship
+
+    @ManyToMany( fetch = FetchType.EAGER)
+    private List<Product> products = new ArrayList<>();
+
 }

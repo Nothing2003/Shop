@@ -1,21 +1,28 @@
 package rj.com.store.controller;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import rj.com.store.datatransferobjects.ApiResponseMessage;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.ProductDTO;
+import rj.com.store.exceptions.ResourceNotFoundException;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.ProductService;
 import java.util.Date;
 
 @RestController
 @RequestMapping("/products/v1")
-@SecurityRequirement(name = "scheme")
-@Tag(name = "Products Controller ",description = "This is product Api for products operation")
+@SecurityRequirement(name = "schema")
+@Tag(name = "Products Controller", description = "API for managing products, including CRUD operations and search capabilities.")
+
 public class ProductController {
     ProductService productService;
     public  ProductController(ProductService productService){
@@ -24,6 +31,7 @@ public class ProductController {
     //    create
     @PostMapping
     @Operation(summary = " Create a product")
+
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO)
     {
         return new ResponseEntity<>(productService.createProduct(productDTO), HttpStatus.CREATED);
@@ -146,11 +154,11 @@ public class ProductController {
     {
         return new ResponseEntity<>(productService.getAllProductBetween(minPrice,maxPrice,pageNumber,pageSize,sortBy,sortDir),HttpStatus.OK);
     }
-    //product with category
-    @PostMapping("/with-category/{categoryId}")
+    // create product with category
+    @PostMapping("/with-category")
     @Operation(summary = "User to create product with category ")
-    public ResponseEntity<ProductDTO> createProductWithCategory(@PathVariable("categoryId") String categoryId,@RequestBody ProductDTO productDTO){
-        return new ResponseEntity<>(productService.createWithCategory(productDTO,categoryId),HttpStatus.CREATED);
+    public ResponseEntity<ProductDTO> createProductWithCategory(@RequestBody ProductDTO productDTO){
+        return new ResponseEntity<>(productService.createWithCategory(productDTO),HttpStatus.CREATED);
     }
     //get all product by category
     @GetMapping("/category-by-product/{categoryId}")
@@ -167,14 +175,24 @@ public class ProductController {
                 productService.getAllProductByCategory(categoryId,pageNumber,pageSize,sortBy,sortDir)
                 ,HttpStatus.OK);
     }
-    //update product by category
-    @PutMapping("/update-category/product/{productId}/category/{categoryId}")
+    // add category in product
+    @PutMapping("/add-category/product/{productId}/category/{categoryId}")
     @Operation(summary = "Products by category Id ")
-    public ResponseEntity<ProductDTO> updateProductCategory(
+    public ResponseEntity<ProductDTO> addProductCategory(
             @PathVariable("categoryId") String categoryId,
             @PathVariable("productId") String productId
     )
     {
-        return new ResponseEntity<>(productService.updateCategory(productId,categoryId),HttpStatus.OK);
+        return new ResponseEntity<>(productService.addCategory(productId,categoryId),HttpStatus.OK);
+    }
+    // remove category in product
+    @PutMapping("/remove-category/product/{productId}/category/{categoryId}")
+    @Operation(summary = "Products by category Id ")
+    public ResponseEntity<ProductDTO> removeProductCategory(
+            @PathVariable("categoryId") String categoryId,
+            @PathVariable("productId") String productId
+    )
+    {
+        return new ResponseEntity<>(productService.removeCategory(productId,categoryId),HttpStatus.OK);
     }
 }

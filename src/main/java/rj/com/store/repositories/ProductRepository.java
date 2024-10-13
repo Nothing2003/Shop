@@ -15,5 +15,5 @@ public interface ProductRepository extends JpaRepository<Product,String> {
     Optional<Page<Product>> findByAddedDate (Date date, Pageable pageable);
     Optional<Page<Product>> findByPrice ( double price, Pageable pageable);
     Optional<Page<Product>> findByPriceBetween (double minPrice,double maxPrice, Pageable pageable);
-    Optional<Page<Product>> findByCategory(Category category, Pageable pageable);
+    Optional<Page<Product>> findByCategories(Category category, Pageable pageable);
 }

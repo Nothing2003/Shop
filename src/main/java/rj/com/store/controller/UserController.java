@@ -1,15 +1,21 @@
 package rj.com.store.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.converters.SchemaPropertyDeprecatingConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.endpoint.web.EndpointMediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +27,7 @@ import rj.com.store.datatransferobjects.ImageResponse;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.UserDTO;
 import rj.com.store.enities.Providers;
+import rj.com.store.exceptions.BadApiRequest;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.FileService;
 import rj.com.store.services.UserService;
@@ -33,26 +40,26 @@ import java.io.InputStream;
 @SecurityRequirement(name = "scheme")
 @Tag(name = "Users Controller ",description = "This is user Api for users operation")
 public class UserController {
+    private final EndpointMediaTypes endpointMediaTypes;
+    private final SchemaPropertyDeprecatingConverter schemaPropertyDeprecatingConverter;
     private Logger logger= LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final FileService fileService;
     @Value("${user.profile.image.path}")
     private String imageUploadPath;
-    public UserController(UserService userService,FileService fileService) {
+    @Enumerated(EnumType.STRING)
+    Providers provider= Providers.SELF;
+    public UserController(UserService userService, FileService fileService, EndpointMediaTypes endpointMediaTypes, EndpointMediaTypes hendpointMediaTypes, SchemaPropertyDeprecatingConverter schemaPropertyDeprecatingConverter) {
         this.userService = userService;
         this.fileService=fileService;
+        this.endpointMediaTypes = endpointMediaTypes;
+        this.schemaPropertyDeprecatingConverter = schemaPropertyDeprecatingConverter;
     }
     //create
     @PostMapping
     @Operation(summary = "create new user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "Success | OK "),
-            @ApiResponse(responseCode = "401",description = "not authorized !! "),
-            @ApiResponse(responseCode = "201",description = "new User created !! ")
-    }
-    )
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
-        userDTO.setProvider(Providers.SELF);
+        userDTO.setProvider(provider);
         if (userDTO.getImageName().isEmpty()) {
             userDTO.setImageName("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed");
         }
