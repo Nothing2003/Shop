@@ -7,6 +7,8 @@ import com.google.api.client.json.gson.GsonFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.TableGenerator;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -29,11 +31,19 @@ import rj.com.store.services.UserService;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-
+/**
+ * Controller for handling authentication-related APIs.
+ *
+ * This class provides endpoints for user authentication, including login,
+ * registration, and token management.
+ * It uses security requirements to protect sensitive operations and uses JWT for authentication.
+ *
+ * @see JwtHelper
+ */
 @RestController
 @RequestMapping("/auth/v1")
 @SecurityRequirement(name = "scheme")
-@Tag(name = "Authentication" ,description = "APIs for authentication ")
+@Tag(name = "Authentication", description = "APIs for authentication")
 public class AuthenticationController {
     @Value("${app.google.client_id}")
     private String googleClientId;
@@ -46,10 +56,22 @@ public class AuthenticationController {
     private final ModelMapper modelMapper;
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
-
-    public AuthenticationController(AuthenticationManager authenticationManager,JwtHelper jwtHelper,
-                                    UserDetailsService userDetailsService,ModelMapper modelMapper,
-                                    UserService userService, RefreshTokenService refreshTokenService){
+    @Enumerated(EnumType.STRING)
+    private final Providers provider=Providers.GOOGLE;
+    /**
+     * Constructs an instance of {@link AuthenticationController} with the specified dependencies.
+     *
+     * @param authenticationManager     the manager for handling authentication requests
+     * @param jwtHelper                 the utility for JWT operations, including token generation and validation
+     * @param userDetailsService        the service for loading user-specific data
+     * @param modelMapper               the model mapper for converting between entities and DTOs
+     * @param userService               the service for managing user-related operations
+     * @param refreshTokenService       the service for handling refresh token operations
+     */
+    public AuthenticationController(
+            AuthenticationManager authenticationManager,JwtHelper jwtHelper,
+            UserDetailsService userDetailsService,ModelMapper modelMapper,
+            UserService userService, RefreshTokenService refreshTokenService){
         this.authenticationManager=authenticationManager;
         this.jwtHelper=jwtHelper;
         this.userDetailsService=userDetailsService;
@@ -57,11 +79,22 @@ public class AuthenticationController {
         this.userService=userService;
         this.refreshTokenService=refreshTokenService;
     }
+    /**
+     * Authenticates a user and generates a JWT token.
+     *
+     * This endpoint takes a JWTRequest object containing the user's email and password,
+     * authenticates the user, and generates a JWT token along with a refresh token.
+     *
+     * @param jwtRequest the request object containing the user's email and password
+     * @return a ResponseEntity containing the JWTResponse with the generated token,
+     *         refresh token, and user details
+     * @throws BadApiRequest if authentication fails or if the provided credentials are invalid
+     */
     @PostMapping("/generate-token")
     @Operation(summary = "Generate Token by JWTRequest")
     public ResponseEntity<JWTResponse> login(@RequestBody JWTRequest jwtRequest) {
-
-        logger.info("Username {}, Password {}", jwtRequest.getEmail(), jwtRequest.getPassword());
+//
+//        logger.info("Username {}, Password {}", jwtRequest.getEmail(), jwtRequest.getPassword());
         this.doAuthenticate(jwtRequest.getEmail(),jwtRequest.getPassword());
         User user = (User) this.userDetailsService.loadUserByUsername(jwtRequest.getEmail());
         String token = jwtHelper.generateToken(user);
@@ -74,6 +107,18 @@ public class AuthenticationController {
                         .user(modelMapper.map(user, UserDTO.class))
                         .build());
     }
+    /**
+     * Regenerates a JWT token using a valid refresh token.
+     *
+     * This endpoint accepts a RefreshTokenRequest containing a refresh token,
+     * verifies the token, and generates a new JWT token for the user.
+     *
+     * @param refreshTokenRequest the request object containing the refresh token
+     * @return a ResponseEntity containing the JWTResponse with the new JWT token,
+     *         user details, and the original refresh token
+     * @throws BadApiRequest if the refresh token is invalid or expired
+     * @throws ResourceNotFoundException if the user associated with the refresh token cannot be found
+     */
     @PostMapping("/regenerate-token")
     @Operation(summary = "Generate Token by Refresh Token Request")
     public ResponseEntity<JWTResponse>regenerateToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
@@ -86,8 +131,21 @@ public class AuthenticationController {
                 .refreshToken(refreshTokenDTO)
                 .build());
     }
-
-    //handle login with Google
+    /**
+     * Handles login requests via Google authentication.
+     *
+     * This method verifies the provided Google ID token, extracts user information,
+     * and either retrieves an existing user or creates a new user in the system.
+     * Upon successful verification, a JWT token and refresh token are generated
+     * for the authenticated user.
+     *
+     * @param googleLoginRequest the request containing the Google ID token
+     * @return a ResponseEntity containing the JWT response, including the JWT token,
+     *         refresh token, and user information
+     * @throws GeneralSecurityException if a security-related error occurs
+     * @throws IOException if an I/O error occurs during token verification
+     * @throws BadApiRequest if the Google login verification fails
+     */
     @PostMapping("/login-with-google")
     @Operation(summary = "Generate Token by Google Login Request")
     public ResponseEntity<JWTResponse> handleGoogleLogin(@RequestBody GoogleLoginRequest googleLoginRequest) throws GeneralSecurityException, IOException {
@@ -106,7 +164,7 @@ public class AuthenticationController {
                     .imageName(pictureUrl)
                     .password(googlePassword)
                     .about("User created by google")
-                    .provider(Providers.GOOGLE)
+                    .provider(provider)
                     .build();
             UserDTO user=null;
             try {
@@ -131,6 +189,18 @@ public class AuthenticationController {
             throw new BadApiRequest("Google login failed");
         }
     }
+    /**
+     * Authenticates a user based on their email and password.
+     *
+     * This method attempts to authenticate the user using the provided email and password.
+     * If authentication fails due to incorrect credentials,
+     * a BadCredentialsException is thrown.
+     *
+     * @param email    the email of the user trying to authenticate
+     * @param password the password of the user trying to authenticate
+     * @throws BadCredentialsException if the authentication fails due to
+     *                                  incorrect email or password
+     */
     private void doAuthenticate(String email, String password) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));

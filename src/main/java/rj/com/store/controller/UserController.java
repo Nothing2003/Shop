@@ -1,15 +1,10 @@
 package rj.com.store.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +12,7 @@ import org.springdoc.core.converters.SchemaPropertyDeprecatingConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.web.EndpointMediaTypes;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import rj.com.store.datatransferobjects.ApiResponseMessage;
@@ -27,18 +20,19 @@ import rj.com.store.datatransferobjects.ImageResponse;
 import rj.com.store.datatransferobjects.PageableResponse;
 import rj.com.store.datatransferobjects.UserDTO;
 import rj.com.store.enities.Providers;
-import rj.com.store.exceptions.BadApiRequest;
 import rj.com.store.helper.AppCon;
 import rj.com.store.services.FileService;
 import rj.com.store.services.UserService;
 
 import java.io.IOException;
-import java.io.InputStream;
 
+/**
+ * Controller for managing user-related operations.
+ */
 @RestController
 @RequestMapping("/users/v1")
 @SecurityRequirement(name = "scheme")
-@Tag(name = "Users Controller ",description = "This is user Api for users operation")
+@Tag(name = "Users Controller", description = "This is user API for user operations")
 public class UserController {
     private final EndpointMediaTypes endpointMediaTypes;
     private final SchemaPropertyDeprecatingConverter schemaPropertyDeprecatingConverter;
@@ -55,18 +49,24 @@ public class UserController {
         this.endpointMediaTypes = endpointMediaTypes;
         this.schemaPropertyDeprecatingConverter = schemaPropertyDeprecatingConverter;
     }
-    //create
+    /**
+     * Create a new user.
+     * @param userDTO the user details
+     * @return the created user details
+     */
     @PostMapping
     @Operation(summary = "create new user")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
         userDTO.setProvider(provider);
-        if (userDTO.getImageName().isEmpty()) {
-            userDTO.setImageName("https://res-console.cloudinary.com/dfikzvebd/media_explorer_thumbnails/8b0789a5b6b0a31d118be5dd0e62e62a/detailed");
-        }
         UserDTO user = userService.createUser(userDTO);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
-    //update
+    /**
+     * Update user details.
+     * @param userDTO the updated user details
+     * @param userId the ID of the user to update
+     * @return the updated user details
+     */
     @PutMapping("/{userId}")
     @Operation(summary = "update user")
     public ResponseEntity<UserDTO> updateUser(
@@ -74,7 +74,12 @@ public class UserController {
             @PathVariable("userId") String userId) {
         return new ResponseEntity<>(userService.UpdateUser(userDTO, userId), HttpStatus.OK);
     }
-    //delete
+    /**
+     * Delete a user.
+     * @param userId the ID of the user to delete
+     * @return a response message indicating success
+     * @throws IOException if an I/O error occurs
+     */
     @DeleteMapping("/{userId}")
     @Operation(summary = "delete user")
     public ResponseEntity<ApiResponseMessage> deleteUser(
@@ -89,7 +94,14 @@ public class UserController {
                 .build(), HttpStatus.OK);
 
     }
-    //get All
+    /**
+     * Get all users.
+     * @param pageNumber the page number to retrieve
+     * @param pageSize the number of users per page
+     * @param sortBy the field to sort by
+     * @param sortDir the direction to sort (asc/desc)
+     * @return a paginated list of users
+     */
     @GetMapping
     @Operation(summary = "get all users")
     public ResponseEntity<PageableResponse<UserDTO>> getAllUsers(
@@ -102,7 +114,11 @@ public class UserController {
                 .getAllUser(pageNumber,pageSize,sortBy,sortDir),
                 HttpStatus.OK);
     }
-    //get By id
+    /**
+     * Get a single user by ID.
+     * @param userId the ID of the user to retrieve
+     * @return the user details
+     */
     @GetMapping("/{userId}")
     @Operation(summary = "get single user")
     public ResponseEntity<UserDTO> getUserById(
@@ -111,7 +127,11 @@ public class UserController {
                 .getUserById(userId),
                 HttpStatus.OK);
     }
-    //get By Email
+    /**
+     * Get a user by email.
+     * @param email the email of the user to retrieve
+     * @return the user details
+     */
     @GetMapping("/email/{email}")
     @Operation(summary = "get user by emailId")
     public ResponseEntity<UserDTO> getUserByEmail(
@@ -120,7 +140,15 @@ public class UserController {
                 .getUserByEmail(email),
                 HttpStatus.OK);
     }
-    //search user
+    /**
+     * Search for users by keyword.
+     * @param keyword the keyword to search for
+     * @param pageNumber the page number to retrieve
+     * @param pageSize the number of users per page
+     * @param sortBy the field to sort by
+     * @param sortDir the direction to sort (asc/desc)
+     * @return a paginated list of users matching the search criteria
+     */
     @GetMapping("/search/{keyword}")
     @Operation(summary = "search user by key word")
     public ResponseEntity<PageableResponse<UserDTO>> searchUser(
@@ -134,8 +162,15 @@ public class UserController {
                         .searchUser(keyword, pageNumber, pageSize, sortBy, sortDir),
                 HttpStatus.OK);
     }
-    //upload image
+    /**
+     * Upload a user's profile image.
+     * @param userId the ID of the user
+     * @param image the image file to upload
+     * @return a response containing the uploaded image information
+     * @throws IOException if an I/O error occurs during image upload
+     */
     @PostMapping("/image/{userId}")
+    @Operation(summary = "Upload user image")
     public ResponseEntity<ImageResponse> uploadUserImage(@PathVariable("userId") String userId,
             @RequestParam("userImage")MultipartFile image) throws IOException{
            String imageName=fileService.uploadImage(image, imageUploadPath);
@@ -154,14 +189,5 @@ public class UserController {
                     HttpStatus.CREATED
             );
     }
-    //serve User Image
-    @GetMapping("/image/{userId}")
-    public void serveUserImage(@PathVariable("userId") String userId, HttpServletResponse response) throws IOException {
-       UserDTO userDTO= userService.getUserById(userId);
-        logger.info("User image name {}",userDTO.getImageName());
-      InputStream resource=fileService.getResource(imageUploadPath,userDTO.getImageName());
-      response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        StreamUtils.copy(resource,response.getOutputStream());
 
-    }
 }

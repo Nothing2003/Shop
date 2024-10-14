@@ -35,17 +35,17 @@ public class SecurityConfig  {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable);
-        http.cors(httpSecurityCorsConfigurer ->
-                httpSecurityCorsConfigurer.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOriginPatterns(List.of("http://localhost:4200"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setMaxAge(3600L);
-                    return config;
-                })
-                );
+//        http.cors(httpSecurityCorsConfigurer ->
+//                httpSecurityCorsConfigurer.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowedOriginPatterns(List.of("http://localhost:4200"));
+//                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//                    config.setAllowCredentials(true);
+//                    config.setAllowedHeaders(List.of("*"));
+//                    config.setMaxAge(3600L);
+//                    return config;
+//                })
+//                );
         //Configuration
         http.authorizeHttpRequests(
                 //configuration URL
@@ -59,19 +59,37 @@ public class SecurityConfig  {
                             "webjars/**"
                     ).permitAll();
                     //User URL Configuration
-                    requests.requestMatchers(HttpMethod.DELETE,"/users/**").hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
-                            .requestMatchers(HttpMethod.PUT,"/users/**").hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
-                            .requestMatchers(HttpMethod.GET,"/users/**").permitAll()
-                            .requestMatchers(HttpMethod.POST,"/users/**").permitAll();
+                    requests.requestMatchers(HttpMethod.DELETE,"/users/**")
+                            .hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
+                            .requestMatchers(HttpMethod.PUT,"/users/**")
+                            .hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
+                            .requestMatchers(HttpMethod.GET,"/users/**")
+                            .permitAll()
+                            .requestMatchers(HttpMethod.POST,"/users/**")
+                            .permitAll();
                     //Production URL Configuration
-                    requests.requestMatchers(HttpMethod.GET,"/products/**").permitAll()
-                            .requestMatchers("/products/**").hasRole(AppCon.ROLE_ADMIN);
+                    requests.requestMatchers(HttpMethod.GET,"/products/**")
+                            .permitAll()
+                            .requestMatchers("/products/**")
+                            .hasRole(AppCon.ROLE_ADMIN);
                     //Categories URL Configuration
-                    requests.requestMatchers(HttpMethod.GET,"/categories/**").permitAll()
-                            .requestMatchers("/categories/**").hasRole(AppCon.ROLE_ADMIN);
+                    requests.requestMatchers(HttpMethod.GET,"/categories/**")
+                            .permitAll()
+                            .requestMatchers("/categories/**")
+                            .hasRole(AppCon.ROLE_ADMIN);
                     //Authentication URL Configuration
-                    requests.requestMatchers("/auth/**").permitAll();
-
+                    requests.requestMatchers("/auth/**")
+                            .permitAll();
+                    //Cart URL Configuration
+                    requests.requestMatchers("carts/**")
+                            .hasAnyRole(AppCon.ROLE_NORMAL,AppCon.ROLE_ADMIN);
+                    //Order URL Configuration
+                    requests.requestMatchers(HttpMethod.POST,"orders/v1/create/user/")
+                            .hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
+                            .requestMatchers(HttpMethod.PUT,"orders/v1/update/")
+                            .hasAnyRole(AppCon.ROLE_ADMIN,AppCon.ROLE_NORMAL)
+                            .requestMatchers(HttpMethod.DELETE,"orders/**")
+                            .hasRole(AppCon.ROLE_ADMIN);
 
                 }
         );
@@ -83,7 +101,8 @@ public class SecurityConfig  {
             exception.authenticationEntryPoint(authenticationEntryPoint)
         );
         //session creation policy
-        http.sessionManagement(session ->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.sessionManagement(session ->session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         //main
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
