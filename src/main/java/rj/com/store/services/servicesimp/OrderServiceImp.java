@@ -114,9 +114,6 @@ public class OrderServiceImp implements OrderService {
         // Set the list of OrderItems and the total amount for the order
         order.setOrderItems(orderItems);
         order.setTotalAmount(orderAmount.get());
-
-        // Clear the items in the cart since the order has been created
-        cart.getItems().clear();
         cartRepository.save(cart); // Save the updated cart
 
         // Save the created order in the repository and return the mapped OrderDTO
